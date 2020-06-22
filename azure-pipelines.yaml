@@ -26,7 +26,7 @@ variables:
   - name: version_minor
     value: '0'
   - name: version_patch
-    value: '68'
+    value: '69'
 
 stages:
 - stage: Testing
@@ -68,6 +68,7 @@ stages:
       displayName: 'Publish test extension'
 
     - script: |
+        sleep 60
         docker pull debian
       displayName: 'Pull image to test'
 
