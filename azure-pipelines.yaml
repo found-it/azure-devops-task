@@ -29,11 +29,11 @@ variables:
     value: '70'
 
 stages:
-- stage: Testing
-  displayName: Build and Test
+- stage: Build
+  displayName: Build
   jobs:
-  - job: Testing
-    displayName: Build and Test
+  - job: Build
+    displayName: Build
     steps:
     - task: NodeTool@0
       inputs:
@@ -67,8 +67,15 @@ stages:
         tfx extension publish --publisher $(publisher) --manifests $(test_manifest) --token $(test_publish_token) --share-with $(organization)
       displayName: 'Publish test extension'
 
+- stage: Test
+  dependsOn: Build
+  displayName: Test
+  jobs:
+  - job: Test
+    displayName: Test
+    steps:
     - script: |
-        sleep 600
+        sleep 60
         docker pull debian
       displayName: 'Pull image to test'
 
@@ -81,7 +88,7 @@ stages:
       displayName: 'Success Message'
 
 - stage: Deploy
-  dependsOn: Testing
+  dependsOn: Test
   displayName: Deploy Anchore Task
   jobs:
   - job: Deploy
