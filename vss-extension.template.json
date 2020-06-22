@@ -1,8 +1,7 @@
 {
     "manifestVersion": 1,
-    "public": false,
-    "id": "anchore-build-release-task-test",
-    "name": "Anchore Build and Release Tools (Test)",
+    "id": "$ANCHORE_MANIFEST_ID",
+    "name": "Anchore Build and Release Tools",
     "version": "0.0.66",
     "publisher": "FoundItSoftware",
     "targets": [

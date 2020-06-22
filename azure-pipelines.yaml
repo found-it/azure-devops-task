@@ -16,8 +16,8 @@ variables:
   - name: organization
     value: 'jpetersenames'
 
-  - group: PublishingCredentials
-### value: test_publish_token
+  - group: TestPublishing
+  - group: DeployPublishing
 
 stages:
 - stage: Testing
@@ -38,10 +38,20 @@ stages:
       displayName: 'Anchore@0: Install and Build'
 
     - script: |
-        npm install -g tfx-cli
-        tfx extension publish --publisher $(publisher) --manifests $(test_manifest) --token $(test_publish_token) --share-with $(organization)
-      displayName: 'Publish test extension'
+        echo "##vso[task.setvariable variable=ANCHORE_MANIFEST_ID]$(test_manifest_id)"
+        echo "##vso[task.setvariable variable=ANCHORE_TASK_ID]$(test_task_id)"
+        echo "##vso[task.setvariable variable=ANCHORE_TASK_NAME]$(test_task_name)"
+        envsubst < vss-extension.template.json > $(test_manifest)
+        envsubst < anchore-task/task.template.json > anchore-task/task.json
+        cat $(test_manifest)
+        cat anchore-task/task.json
 
-    - script: |
-        docker pull alpine
-      displayName: 'Pull image to test'
+
+    # - script: |
+    #     npm install -g tfx-cli
+    #     tfx extension publish --publisher $(publisher) --manifests $(test_manifest) --token $(test_publish_token) --share-with $(organization)
+    #   displayName: 'Publish test extension'
+    #
+    # - script: |
+    #     docker pull alpine
+    #   displayName: 'Pull image to test'
