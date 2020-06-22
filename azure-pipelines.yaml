@@ -21,6 +21,13 @@ variables:
   - name: deploy_manifest
     value: 'vss-extension.deploy.json'
 
+  - name: version_major
+    value: '0'
+  - name: version_minor
+    value: '0'
+  - name: version_patch
+    value: '0'
+
 stages:
 - stage: Testing
   displayName: Build and Test
@@ -43,6 +50,10 @@ stages:
         export ANCHORE_MANIFEST_ID=$(test_manifest_id)
         export ANCHORE_TASK_ID=$(test_task_id)
         export ANCHORE_TASK_NAME=$(test_task_name)
+        export VERSION_MAJOR=$(version_major)
+        export VERSION_MINOR=$(version_minor)
+        export VERSION_PATCH=$(version_patch)
+        export ANCHORE_EXTENSION_VERSION=$(version_major).$(version_minor).$(version_patch)
         envsubst < vss-extension.template.json > $(test_manifest)
         envsubst < anchore-task/task.template.json > anchore-task/task.json
       displayName: 'Configure test task'
@@ -57,12 +68,12 @@ stages:
       displayName: 'Publish test extension'
 
     - script: |
-        docker pull alpine
+        docker pull debian
       displayName: 'Pull image to test'
 
     - task: AnchoreTesting@0
       inputs:
-        image: 'alpine:latest'
+        image: 'debian:latest'
 
     - script: |
         echo 'Passed the testing!'
@@ -75,10 +86,25 @@ stages:
   - job: Deploy
     displayName: Deploy Anchore Task
     steps:
+    - task: NodeTool@0
+      inputs:
+        versionSpec: '10.x'
+      displayName: 'Install Node.js'
+
+    - script: |
+        npm install
+        npm run build
+      workingDirectory: anchore-task
+      displayName: 'Install and Build the task'
+
     - script: |
         export ANCHORE_MANIFEST_ID=$(deploy_manifest_id)
         export ANCHORE_TASK_ID=$(deploy_task_id)
         export ANCHORE_TASK_NAME=$(deploy_task_name)
+        export VERSION_MAJOR=$(version_major)
+        export VERSION_MINOR=$(version_minor)
+        export VERSION_PATCH=$(version_patch)
+        export ANCHORE_EXTENSION_VERSION=$(version_major).$(version_minor).$(version_patch)
         envsubst < vss-extension.template.json > $(deploy_manifest)
         envsubst < anchore-task/task.template.json > anchore-task/task.json
       displayName: 'Configure deploy task'
@@ -86,5 +112,10 @@ stages:
     - script: |
         cat $(deploy_manifest)
         cat anchore-task/task.json
+
+    - script: |
+        npm install -g tfx-cli
+        tfx extension publish --publisher $(publisher) --manifests $(deploy_manifest) --token $(test_publish_token) --share-with $(organization)
+      displayName: 'Publish deploy extension'
 
 

@@ -8,9 +8,9 @@
     "category": "Utility",
     "author": "Anchore",
     "version": {
-        "Major": 0,
-        "Minor": 0,
-        "Patch": 67
+        "Major": "$VERSION_MAJOR",
+        "Minor": "$VERSION_MINOR",
+        "Patch": "$VERSION_PATCH"
     },
     "instanceNameFormat": "Anchore Container Scan",
     "inputs": [

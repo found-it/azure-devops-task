@@ -228,6 +228,10 @@ async function run() {
         let vulnerabilitiesPath: string = getVulnPath(reportsPath);
 
         // Set outputs
+        console.log("Setting outputs.");
+        console.log("policyStatus");
+        console.log("billOfMaterials");
+        console.log("vulnerabilities");
         tl.setVariable('policyStatus', policyStatus);
         tl.setVariable('billOfMaterials', billOfMaterialsPath);
         tl.setVariable('vulnerabilities', vulnerabilitiesPath);
