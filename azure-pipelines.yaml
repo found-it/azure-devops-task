@@ -54,7 +54,6 @@ stages:
     - script: |
         npm install -g tfx-cli
         tfx extension publish --publisher $(publisher) --manifests $(test_manifest) --token $(test_publish_token) --share-with $(organization)
-        sleep 10
       displayName: 'Publish test extension'
 
     - script: |
@@ -69,13 +68,20 @@ stages:
         echo 'Passed the testing!'
       displayName: 'Success Message'
 
+- stage: Deploy
+  dependsOn: Testing
+  displayName: Deploy Anchore Task
+  jobs:
+  - job: Deploy
+    displayName: Deploy Anchore Task
+    steps:
     - script: |
         export ANCHORE_MANIFEST_ID=$(deploy_manifest_id)
         export ANCHORE_TASK_ID=$(deploy_task_id)
         export ANCHORE_TASK_NAME=$(deploy_task_name)
         envsubst < vss-extension.template.json > $(deploy_manifest)
         envsubst < anchore-task/task.template.json > anchore-task/task.json
-      displayName: 'Configure test task'
+      displayName: 'Configure deploy task'
 
     - script: |
         cat $(deploy_manifest)
