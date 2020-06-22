@@ -9,7 +9,15 @@ pool:
 variables:
   - name: srcDirectory
     value: '$(System.DefaultWorkingDirectory)/src'
+  - name: publisher
+    value: 'FoundItSoftware'
+  - name: test_manifest
+    value: 'vss-extension.test.json'
+  - name: organization
+    value: 'jpetersenames'
 
+  - group: PublishingCredentials
+### value: test_publish_token
 
 stages:
 - stage: Testing
@@ -30,6 +38,10 @@ stages:
       displayName: 'Anchore@0: Install and Build'
 
     - script: |
-        npm run test
-      workingDirectory: anchore-task
-      displayName: 'Anchore@0: Test'
+        npm install -g tfx-cli
+        tfx extension publish --publisher $(publisher) --manifests $(test_manifest) --token $(test_publish_token) --share-with $(organization)
+      displayName: 'Publish test extension'
+
+    - script: |
+        docker pull alpine
+      displayName: 'Pull image to test'
