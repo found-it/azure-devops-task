@@ -18,6 +18,8 @@ variables:
 
   - group: TestPublishing
   - group: DeployPublishing
+  - name: deploy_manifest
+    value: 'vss-extension.deploy.json'
 
 stages:
 - stage: Testing
@@ -52,8 +54,31 @@ stages:
     - script: |
         npm install -g tfx-cli
         tfx extension publish --publisher $(publisher) --manifests $(test_manifest) --token $(test_publish_token) --share-with $(organization)
+        sleep 10
       displayName: 'Publish test extension'
 
     - script: |
         docker pull alpine
       displayName: 'Pull image to test'
+
+    - task: AnchoreTesting@0
+      inputs:
+        image: 'alpine:latest'
+
+    - script: |
+        echo 'Passed the testing!'
+      displayName: 'Success Message'
+
+    - script: |
+        export ANCHORE_MANIFEST_ID=$(deploy_manifest_id)
+        export ANCHORE_TASK_ID=$(deploy_task_id)
+        export ANCHORE_TASK_NAME=$(deploy_task_name)
+        envsubst < vss-extension.template.json > $(deploy_manifest)
+        envsubst < anchore-task/task.template.json > anchore-task/task.json
+      displayName: 'Configure test task'
+
+    - script: |
+        cat $(deploy_manifest)
+        cat anchore-task/task.json
+
+
