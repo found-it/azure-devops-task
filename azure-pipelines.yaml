@@ -26,7 +26,7 @@ variables:
   - name: version_minor
     value: '0'
   - name: version_patch
-    value: '0'
+    value: '68'
 
 stages:
 - stage: Testing
