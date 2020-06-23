@@ -1,7 +1,11 @@
 # Anchore DevOps Task Dev Pipeline
 ---
-trigger:
-- master
+resources:
+  pipelines:
+  - pipeline: taskbuild
+    trigger:
+      branches:
+      - master
 
 pool:
   vmImage: 'ubuntu-latest'
@@ -26,7 +30,7 @@ variables:
   - name: version_minor
     value: '0'
   - name: version_patch
-    value: '71'
+    value: '72'
 
 stages:
 - stage: Build
@@ -67,63 +71,62 @@ stages:
         tfx extension publish --publisher $(publisher) --manifests $(test_manifest) --token $(test_publish_token) --share-with $(organization)
       displayName: 'Publish test extension'
 
-- stage: Test
-  dependsOn: Build
-  displayName: Test
-  jobs:
-  - job: Test
-    displayName: Test
-    steps:
-    - script: |
-        sleep 60
-        docker pull debian
-      displayName: 'Pull image to test'
-
-    - task: AnchoreTesting@0
-      inputs:
-        image: 'debian:latest'
-
-    - script: |
-        echo 'Passed the testing!'
-      displayName: 'Success Message'
-
-- stage: Deploy
-  dependsOn: Test
-  displayName: Deploy Anchore Task
-  jobs:
-  - job: Deploy
-    displayName: Deploy Anchore Task
-    steps:
-    - task: NodeTool@0
-      inputs:
-        versionSpec: '10.x'
-      displayName: 'Install Node.js'
-
-    - script: |
-        npm install
-        npm run build
-      workingDirectory: anchore-task
-      displayName: 'Install and Build the task'
-
-    - script: |
-        export ANCHORE_MANIFEST_ID=$(deploy_manifest_id)
-        export ANCHORE_TASK_ID=$(deploy_task_id)
-        export ANCHORE_TASK_NAME=$(deploy_task_name)
-        export VERSION_MAJOR=$(version_major)
-        export VERSION_MINOR=$(version_minor)
-        export VERSION_PATCH=$(version_patch)
-        export ANCHORE_EXTENSION_VERSION=$(version_major).$(version_minor).$(version_patch)
-        envsubst < vss-extension.template.json > $(deploy_manifest)
-        envsubst < anchore-task/task.template.json > anchore-task/task.json
-      displayName: 'Configure deploy task'
-
-    - script: |
-        cat $(deploy_manifest)
-        cat anchore-task/task.json
-
-    - script: |
-        npm install -g tfx-cli
-        tfx extension publish --publisher $(publisher) --manifests $(deploy_manifest) --token $(test_publish_token) --share-with $(organization)
-      displayName: 'Publish deploy extension'
-
-
+# - stage: Test
+#   dependsOn: Build
+#   displayName: Test
+#   jobs:
+#   - job: Test
+#     displayName: Test
+#     steps:
+#     - script: |
+#         docker pull debian
+#       displayName: 'Pull image to test'
+#
+#     - task: AnchoreTesting@0
+#       inputs:
+#         image: 'debian:latest'
+#
+#     - script: |
+#         echo 'Passed the testing!'
+#       displayName: 'Success Message'
+#
+# - stage: Deploy
+#   dependsOn: Test
+#   displayName: Deploy Anchore Task
+#   jobs:
+#   - job: Deploy
+#     displayName: Deploy Anchore Task
+#     steps:
+#     - task: NodeTool@0
+#       inputs:
+#         versionSpec: '10.x'
+#       displayName: 'Install Node.js'
+#
+#     - script: |
+#         npm install
+#         npm run build
+#       workingDirectory: anchore-task
+#       displayName: 'Install and Build the task'
+#
+#     - script: |
+#         export ANCHORE_MANIFEST_ID=$(deploy_manifest_id)
+#         export ANCHORE_TASK_ID=$(deploy_task_id)
+#         export ANCHORE_TASK_NAME=$(deploy_task_name)
+#         export VERSION_MAJOR=$(version_major)
+#         export VERSION_MINOR=$(version_minor)
+#         export VERSION_PATCH=$(version_patch)
+#         export ANCHORE_EXTENSION_VERSION=$(version_major).$(version_minor).$(version_patch)
+#         envsubst < vss-extension.template.json > $(deploy_manifest)
+#         envsubst < anchore-task/task.template.json > anchore-task/task.json
+#       displayName: 'Configure deploy task'
+#
+#     - script: |
+#         cat $(deploy_manifest)
+#         cat anchore-task/task.json
+#
+#     - script: |
+#         npm install -g tfx-cli
+#         tfx extension publish --publisher $(publisher) --manifests $(deploy_manifest) --token $(test_publish_token) --share-with $(organization)
+#       displayName: 'Publish deploy extension'
+#
+#
