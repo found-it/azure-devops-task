@@ -1,5 +1,11 @@
 # Anchore DevOps Task Dev Pipeline
 ---
+trigger:
+  branches:
+    include:
+    - master
+pr: none
+
 # resources:
 #   pipelines:
 #   - pipeline: taskbuild
@@ -70,6 +76,16 @@ stages:
         npm install -g tfx-cli
         tfx extension publish --publisher $(publisher) --manifests $(test_manifest) --token $(test_publish_token) --share-with $(organization)
       displayName: 'Publish test extension'
+
+    - task: CopyFiles@2
+      inputs:
+        contents: $(srcDirectory)/index.ts
+        targetFolder: $(Build.ArtifactStagingDirectory)
+
+    - task: PublishBuildArtifacts@1
+      inputs:
+        pathtoPublish: $(Build.ArtifactStagingDirectory)
+        artifactName: dummy-$(Build.BuildId
 
 # - stage: Test
 #   dependsOn: Build
