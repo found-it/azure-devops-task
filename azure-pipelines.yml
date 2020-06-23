@@ -34,7 +34,7 @@ variables:
   - name: version_minor
     value: '0'
   - name: version_patch
-    value: '74'
+    value: '75'
 
 stages:
 - stage: Test
@@ -44,7 +44,7 @@ stages:
     displayName: Test
     steps:
     - script: |
-        sleep 60
+        sleep 600
         docker pull debian
       displayName: 'Pull image to test'
     - task: AnchoreTesting@0
