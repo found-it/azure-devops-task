@@ -1,11 +1,11 @@
 # Anchore DevOps Task Dev Pipeline
 ---
-resources:
-  pipelines:
-  - pipeline: taskbuild
-    trigger:
-      branches:
-      - master
+# resources:
+#   pipelines:
+#   - pipeline: taskbuild
+#     trigger:
+#       branches:
+#       - master
 
 pool:
   vmImage: 'ubuntu-latest'
