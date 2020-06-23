@@ -36,7 +36,7 @@ variables:
   - name: version_minor
     value: '0'
   - name: version_patch
-    value: '73'
+    value: '74'
 
 stages:
 - stage: Build
